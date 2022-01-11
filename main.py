@@ -1,18 +1,17 @@
-from tools.tools import MacInfo
-from tools.tools import PortInfo
-from tools.tools import parse_arp
+from tools.tools import *
 
 INPUT_MAC_FILENAME = 'data\\macs.txt'
 INPUT_PORT_FILENAME = 'data\\ports.txt'
 INPUT_ARP_FILENAME = 'data\\arps.txt'
 MAC_IGNORE_TRESHOLD = 5
 
-def read_macs_input(ports, arps):
+
+def read_macs_input(ports, arps, devPatterns):
     input = open(INPUT_MAC_FILENAME, 'r')
     lines = input.readlines()
 
     for line in lines:
-        mac = MacInfo(line)
+        mac = MacInfo(line, devPatterns.get_pattern_compiled('arubaswos_farmtec_macaddresstable'))
         if mac.mac in arps.keys():
             mac.setIP(arps[mac.mac])
         if mac.port in ports.keys():
@@ -21,25 +20,26 @@ def read_macs_input(ports, arps):
             print("Unknown port: {}".format(mac.port))
     return
 
-def read_arps_input():
+
+def read_arps_input(devPatterns):
     input = open(INPUT_ARP_FILENAME, 'r')
     lines = input.readlines()
     arps = {}
 
     for line in lines:
-        mac, ip, state = parse_arp(line)
+        mac, ip, state = parse_arp(line, devPatterns.get_pattern_compiled('juniper_farmtec_getarp'))
         if (state in ['VLD', 'STS']):
             arps[mac] = ip
     return arps
 
 
-def read_ports_input():
+def read_ports_input(devPatterns):
     input = open(INPUT_PORT_FILENAME, 'r')
     lines = input.readlines()
     ports = {}
 
     for line in lines:
-        port = PortInfo(line)
+        port = PortInfo(line, devPatterns.get_pattern_compiled('arubaswos_farmtec_showint'))
         ports[port.port] = port
     return ports
 
@@ -60,14 +60,14 @@ def print_ports(ports):
                         print("     IP unknown")
                     else:
                         print("     IP: {}".format(mac.ip))
-
     return
 
-def main():
-    arps = read_arps_input()
-    ports = read_ports_input()
-    read_macs_input(ports, arps)
 
+def main():
+    devPatterns = load_patterns()
+    arps = read_arps_input(devPatterns)
+    ports = read_ports_input(devPatterns)
+    read_macs_input(ports, arps, devPatterns)
     print_ports(ports)
 
 

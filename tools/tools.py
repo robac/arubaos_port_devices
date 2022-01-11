@@ -14,9 +14,9 @@ ARP_PATTERN_COMPILED = re.compile(ARP_PATTERN)
 macLookup = MacLookup()
 
 class MacInfo:
-    def __init__(self, text):
+    def __init__(self, text, patternCompiled):
         global macLookup
-        m = MAC_PATTERN_COMPILED.match(text)
+        m = patternCompiled.match(text)
         if not m:
             raise tools.exceptions.InputException
         else:
@@ -33,8 +33,8 @@ class MacInfo:
         self.ip = ip
 
 class PortInfo:
-    def __init__(self, text):
-        m = PORT_PATTERN_COMPILED.match(text)
+    def __init__(self, text, patternCompiled):
+        m = patternCompiled.match(text)
         if not m:
             raise tools.exceptions.InputException
         else:
@@ -51,8 +51,41 @@ class PortInfo:
     def addMac(self, mac):
         self.macs.append(mac)
 
-def parse_arp(text):
-    m = ARP_PATTERN_COMPILED.match(text)
+class DevicePattern:
+    def __init__(self):
+        self.patterns = {}
+
+    def add_pattern(self, name, pattern):
+        if name not in pattern:
+            self.patterns[name] = {}
+        self.patterns[name]['pattern'] = pattern
+        self.patterns[name]['compiled'] = re.compile(pattern)
+
+    def get_pattern(self, name):
+        if name not in self.patterns:
+            raise tools.exceptions.NonExistentPattern
+        else:
+            return self.patterns[name]['pattern']
+
+    def get_pattern_compiled(self, name):
+        if name not in self.patterns:
+            raise tools.exceptions.NonExistentPattern
+        else:
+            return self.patterns[name]['compiled']
+
+
+def load_patterns():
+    devPatterns = DevicePattern()
+
+    devPatterns.add_pattern('arubaswos_farmtec_macaddresstable', "^\s*([a-z0-9]{6}-[a-z0-9]{6})\s*(\S+)\s*(\d)*$")
+    devPatterns.add_pattern('arubaswos_farmtec_showint', "^\s{2}(.{8})\s{1}(.{10})\s{1}(.{7})\s{1}(.{13})\s{1}(.{8})\s{1}(.{10})\s{1}(.{6})\s{1}(.{1,8})")
+    devPatterns.add_pattern('juniper_farmtec_getarp', "^(.{15})\s(.{12})\s*\S*\s*(\S*).*")
+
+    return devPatterns
+
+
+def parse_arp(text, patternCompiled):
+    m = patternCompiled.match(text)
     if not m:
         raise tools.exceptions.InputException
     else:
