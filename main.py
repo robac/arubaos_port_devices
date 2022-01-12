@@ -55,11 +55,12 @@ def print_ports(ports):
             else:
                 for mac in port.macs:
                     print("   {}".format(mac.mac))
-                    print("     {}".format(mac.vendor))
+                    print("   {}".format(mac.vendor))
                     if mac.ip is None:
-                        print("     IP unknown")
+                        print("   IP unknown")
                     else:
-                        print("     IP: {}".format(mac.ip))
+                        print("   IP: {}".format(mac.ip))
+                    print()
     return
 
 
