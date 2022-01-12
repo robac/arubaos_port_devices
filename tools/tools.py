@@ -79,7 +79,8 @@ def load_patterns():
 
     devPatterns.add_pattern('arubaswos_farmtec_macaddresstable', "^\s*([a-z0-9]{6}-[a-z0-9]{6})\s*(\S+)\s*(\d)*$")
     devPatterns.add_pattern('arubaswos_farmtec_showint', "^\s{2}(.{8})\s{1}(.{10})\s{1}(.{7})\s{1}(.{13})\s{1}(.{8})\s{1}(.{10})\s{1}(.{6})\s{1}(.{1,8})")
-    devPatterns.add_pattern('juniper_farmtec_getarp', "^(.{15})\s(.{12})\s*\S*\s*(\S*).*")
+    devPatterns.add_pattern('juniper_farmtec_getarp_old', "^(.{15})\s(.{12})\s*\S*\s*(\S*).*")
+    devPatterns.add_pattern('juniper_farmtec_getarp', "^(.{16})\s(.{12})\s*\S*\s*(\S*).*")
 
     return devPatterns
 
